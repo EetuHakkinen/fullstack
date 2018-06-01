@@ -1,39 +1,39 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-const App = () => {
-    let hyva = {
-        "value": 0,
-        "add": function() {
-            this.value += 1
-            console.log("Hyvän arvoa kasvatettu, ", this.value)
-        }
-    }
-
-    let neutraali = {
-        "value": 0,
-        "add": function () {
-            this.value += 1
-            console.log("neutraalin arvoa kasvatettu, ", this.value)
-        }
-    }
-
-    let huono = {
-        "value": 0,
-        "add": function() {
-            this.value += 1
-            console.log("huonoa arvoa kasvatettu, ", this.value)
-        }
-    }
-
+const App = (props) => {
+    const {hyva} = props.hyva
+    const {neutraali} = props.neutraali
+    const {huono} = props.huono
     return (
         <div>
             <Title text="Anna palautetta" />
-            <button onClick={hyva.add()}>Hyvä</button>
-            <button onClick={neutraali.add()}>Neutraali</button>
-            <button onClick={huono.add()}>Huono</button>
+
+
+            <Title text="Statistiikka" />
+            <p>{hyva}</p>
+            <p>{neutraali}</p>
+            <p>{huono}</p>
         </div>
     )
+}
+
+const Button = (props) => {
+    return (
+        <button onClick{{props.value} ++}>{props.name}</button>
+    )
+}
+
+const hyva = {
+    value: 0
+}
+
+const neutraali = {
+    value: 0
+}
+
+const huono = {
+    value: 0
 }
 
 const Title = (props) => {
@@ -44,4 +44,12 @@ const Title = (props) => {
     )
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const Statistic = (props) => {
+    return (
+        <div>
+            <p>{props.text} {props.value}</p>
+        </div>
+    )
+}
+
+ReactDOM.render(<App hyva={hyva} neutraali={neutraali} huono={huono}/>, document.getElementById('root'));
