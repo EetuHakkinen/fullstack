@@ -15,11 +15,11 @@ const App = () => {
             },
             {
                 nimi: 'Komponenttien tila',
-                tehtavia: 14
+                tehtavia: 13
             }
         ]
     }
-    
+
 
     return (
         <div>
