@@ -22,7 +22,30 @@ const App = () => {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
             />
-            {filtered.length > 10 ? <p>Too many matches, specify another filter</p> : filtered.map((c, i) => <p key={i}>{c.name}</p>)}
+            {filtered.length > 10 ? <p>Too many matches, specify another filter</p> : <List data={filtered} />}
+        </>
+    );
+}
+
+const List = ({data}) => {
+    if (data.length === 1) {
+        return (
+            <Country data={data[0]} />
+        );
+    }
+    return(
+        <>
+            {data.map((c, i) => <p key={i}>{c.name}</p>)}
+        </>
+    );
+}
+
+const Country = ({data}) => {
+    return (
+        <>
+            <h1>{data.name}</h1>
+            <p>capital {data.capital}</p>
+            <p></p>
         </>
     );
 }
