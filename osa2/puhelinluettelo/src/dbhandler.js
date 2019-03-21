@@ -1,5 +1,5 @@
 import axios from 'axios';
-var baseUrl = 'http://localhost:3001/persons'
+var baseUrl = 'http://localhost:3001/persons/'
 
 export const getAll = () => {
     return axios.get(baseUrl)
@@ -18,4 +18,12 @@ export const addNumber = (props) => {
             return res.data
         })
         .catch(e => console.error(e));
+}
+
+export const deletePerson = (id) => {
+    axios.delete(baseUrl + id);
+}
+
+export const replaceNumber = (id, number, name) => {
+    axios.put(baseUrl + id, { name, number });
 }

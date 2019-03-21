@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { getAll, addNumber } from './dbhandler';
+import { getAll, addNumber, deletePerson, replaceNumber } from './dbhandler';
 
 const App = () => {
     const [persons, setPersons] = useState([]);
 
     useEffect(() => {
         getAll().then(data => setPersons(data));
-    }, [])
+    }, [filterList])
 
     const [filterList, setFilterList] = useState('');
 
@@ -38,7 +37,7 @@ const Filter = ({ filterList, setFilterList }) => {
     );
 }
 
-const PersonForm = ({persons, setPersons}) => {
+const PersonForm = ({ persons, setPersons }) => {
     const [name, setName] = useState('');
     const [number, setNumber] = useState('');
 
@@ -46,13 +45,16 @@ const PersonForm = ({persons, setPersons}) => {
         var personsList = persons.filter(p => p.name === name);
         if (personsList.length === 0) {
             event.preventDefault();
-            var newPerson = {name, number}
+            var newPerson = { name, number }
             console.log(newPerson);
             addNumber(newPerson).then(data => setPersons(persons.concat(data)));
             setName('');
             setNumber('');
         } else {
-            window.alert(`${name} on jo luettelossa`);
+            if (window.confirm(`${name} on jo luettelossa, korvataanko vanha numero uudella?`)) {
+                var id = persons.filter(p => p.name === name)[0].id
+                replaceNumber(id, number, name);
+            }
         }
     }
 
@@ -78,10 +80,16 @@ const PersonForm = ({persons, setPersons}) => {
     );
 }
 
-const List = ({filteredList}) => {
+const List = ({ filteredList }) => {
+    const handleRemove = (id, name) => {
+        if (window.confirm(`Poistetaanko ${name}`)) {
+            deletePerson(id);
+        }
+    }
+
     return (
         <>
-            {filteredList.map((p, i) => <p key={i}>{p.name} {p.number}</p>)}
+            {filteredList.map((p, i) => <div key={i}><span>{p.name} {p.number}</span><button onClick={() => handleRemove(p.id, p.name)}>poista</button></div>)}
         </>
     );
 }
