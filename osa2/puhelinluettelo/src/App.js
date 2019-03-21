@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getAll, addNumber } from './dbhandler';
 
 const App = () => {
     const [persons, setPersons] = useState([]);
 
     useEffect(() => {
-        axios
-            .get('http://localhost:3001/persons')
-            .then(v => {
-                setPersons(v.data);
-            })
-    })
+        getAll().then(data => setPersons(data));
+    }, [])
 
     const [filterList, setFilterList] = useState('');
 
@@ -49,7 +46,9 @@ const PersonForm = ({persons, setPersons}) => {
         var personsList = persons.filter(p => p.name === name);
         if (personsList.length === 0) {
             event.preventDefault();
-            setPersons(persons.concat({ name: name, number: number }));
+            var newPerson = {name, number}
+            console.log(newPerson);
+            addNumber(newPerson).then(data => setPersons(persons.concat(data)));
             setName('');
             setNumber('');
         } else {
