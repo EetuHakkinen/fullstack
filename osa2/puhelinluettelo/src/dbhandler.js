@@ -21,9 +21,9 @@ export const addNumber = (props) => {
 }
 
 export const deletePerson = (id) => {
-    axios.delete(baseUrl + id);
+    return axios.delete(baseUrl + id);
 }
 
 export const replaceNumber = (id, number, name) => {
-    axios.put(baseUrl + id, { name, number });
+    return axios.put(baseUrl + id, { name, number });
 }
