@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { getAll, addNumber } from './dbhandler';
+import { getAll, addNumber, deletePerson, replaceNumber } from './dbhandler';
+import './App.css';
 
 const App = () => {
     const [persons, setPersons] = useState([]);
+    const [errorMessage, setErrorMessage] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
+    const [filterList, setFilterList] = useState('');
 
     useEffect(() => {
         getAll().then(data => setPersons(data));
-    }, [])
-
-    const [filterList, setFilterList] = useState('');
+    }, [filterList])
 
     const filteredList = persons.filter(p => p.name.toLowerCase().includes(filterList.toLowerCase()));
 
     return (
         <div>
             <h2>Puhelinluettelo</h2>
+            <Notification message={errorMessage} tone='error' />
+            <Notification message={successMessage} tone='success' />
             <Filter filterList={filterList} setFilterList={e => setFilterList(e.target.value)} />
-            <PersonForm persons={persons} setPersons={v => setPersons(v)} />
+            <PersonForm persons={persons} setPersons={v => setPersons(v)} setSuccessMessage={v => setSuccessMessage(v)} />
             <h2>Numerot</h2>
-            <List filteredList={filteredList} />
+            <List filteredList={filteredList} setErrorMessage={v => setErrorMessage(v)} setSuccessMessage={v => setSuccessMessage(v)} />
         </div>
     )
 
@@ -38,7 +41,7 @@ const Filter = ({ filterList, setFilterList }) => {
     );
 }
 
-const PersonForm = ({persons, setPersons}) => {
+const PersonForm = ({ persons, setPersons, setSuccessMessage }) => {
     const [name, setName] = useState('');
     const [number, setNumber] = useState('');
 
@@ -46,13 +49,28 @@ const PersonForm = ({persons, setPersons}) => {
         var personsList = persons.filter(p => p.name === name);
         if (personsList.length === 0) {
             event.preventDefault();
-            var newPerson = {name, number}
+            var newPerson = { name, number }
             console.log(newPerson);
-            addNumber(newPerson).then(data => setPersons(persons.concat(data)));
+            addNumber(newPerson).then(data => setPersons(persons.concat(data)))
+                .then(v => {
+                    setSuccessMessage('Lisättiin ' + name)
+                    setTimeout(() => {
+                        setSuccessMessage(null)
+                    }, 5000);
+                });
             setName('');
             setNumber('');
         } else {
-            window.alert(`${name} on jo luettelossa`);
+            if (window.confirm(`${name} on jo luettelossa, korvataanko vanha numero uudella?`)) {
+                var id = persons.filter(p => p.name === name)[0].id
+                replaceNumber(id, number, name)
+                    .then(v => {
+                        setSuccessMessage(`Henkilön ${name} numero vaihdettiin`)
+                        setTimeout(() => {
+                            setSuccessMessage(null);
+                        }, 5000);
+                    });
+            }
         }
     }
 
@@ -78,10 +96,40 @@ const PersonForm = ({persons, setPersons}) => {
     );
 }
 
-const List = ({filteredList}) => {
+const List = ({ filteredList, setSuccessMessage, setErrorMessage }) => {
+    const handleRemove = (id, name) => {
+        if (window.confirm(`Poistetaanko ${name}`)) {
+            deletePerson(id)
+                .then(v => {
+                    setSuccessMessage(`Poistettiin ${name}`)
+                    setTimeout(() => {
+                        setSuccessMessage(null);
+                    }, 5000);
+                })
+                .catch(v => {
+                    setErrorMessage(`Henkilö ${name} on jo poistettu`)
+                    setTimeout(() => {
+                        setErrorMessage(null);
+                    }, 5000)
+                })
+        }
+    }
+
     return (
         <>
-            {filteredList.map((p, i) => <p key={i}>{p.name} {p.number}</p>)}
+            {filteredList.map((p, i) => <div key={i}><span>{p.name} {p.number}</span><button onClick={() => handleRemove(p.id, p.name)}>poista</button></div>)}
         </>
+    );
+}
+
+const Notification = ({ message, tone }) => {
+    if (!message) {
+        return null;
+    }
+
+    return (
+        <div className={tone}>
+            {message}
+        </div>
     );
 }
