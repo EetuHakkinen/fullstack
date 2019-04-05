@@ -25,11 +25,10 @@ app.use(morgan(function (tokens, req, res) {
       tokens.status(req, res),
       tokens.res(req, res, 'content-length'), '-',
       tokens['response-time'](req, res), 'ms',
-      morgan.token('type', function (req, res) { return req.headers })
     ].join(' ')
 }));
 app.use(cors());
-
+app.use(express.static('build'));
 app.get('/api/persons', (req, res) => {
     res.json(persons);
 });
@@ -57,6 +56,7 @@ app.delete('/api/persons/:id', (req, res) => {
 app.post('/api/persons', (req, res) => {
     const id = Math.floor(Math.random() * 1000000000);
     const person = req.body;
+    console.log(person);
 
     if (!person.name) {
         return res.status(400).json({ error: 'name is required' });
@@ -74,7 +74,7 @@ app.post('/api/persons', (req, res) => {
     res.status(200).send(person);
 })
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running at port ${PORT}`);
 });
