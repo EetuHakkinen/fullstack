@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
+const cors = require('cors');
 
 let persons = [
     {
@@ -27,6 +28,7 @@ app.use(morgan(function (tokens, req, res) {
       morgan.token('type', function (req, res) { return req.headers })
     ].join(' ')
 }));
+app.use(cors());
 
 app.get('/api/persons', (req, res) => {
     res.json(persons);
