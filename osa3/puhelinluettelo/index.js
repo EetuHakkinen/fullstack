@@ -1,4 +1,7 @@
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
@@ -79,7 +82,10 @@ app.post('/api/persons', (req, res) => {
 
     person.save().then(saved => {
         res.json(saved);
-    });
+    })
+    .catch(e => {
+        res.status(400).json({ error: e });
+    })
 });
 
 app.put('/api/persons/:id', (req, res) => {
