@@ -12,6 +12,7 @@ const Login = ({ user, setNotification }) => {
             let usr = await login(data);
             if (usr.name && usr.name !== 'Error') {
                 user(usr);
+                window.localStorage.setItem('user', JSON.stringify(usr));
             } else {
                 setNotification('Wrong username or password!');
                 setTimeout(() => {
@@ -26,6 +27,7 @@ const Login = ({ user, setNotification }) => {
         }
         setUsername('');
         setPassword('');
+    
     }
 
     return (

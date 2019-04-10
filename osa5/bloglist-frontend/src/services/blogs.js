@@ -14,4 +14,19 @@ const postNew = (props) => {
     axios.post(baseUrl, { title: props.title, author: props.author, url: props.url }, config);
 }
 
-export default { getAll, postNew }
+const like = ({blog}) => {
+    const obj = {
+        user: blog.user._id,
+        likes: blog.likes + 1,
+        author: blog.author,
+        title: blog.title,
+        url: blog.url
+    }
+    axios.post(baseUrl + '/' + blog._id, obj);
+}
+
+const remove = (id) => {
+    axios.delete(baseUrl + '/' + id);
+}
+
+export default { getAll, postNew, like, remove }
