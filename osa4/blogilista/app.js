@@ -23,7 +23,4 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use('/api/blogs', blogsRouter)
 
-const PORT = process.env.PORT || 3003;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-})
+module.exports = app;
