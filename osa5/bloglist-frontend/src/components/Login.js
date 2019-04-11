@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import login from '../services/login';
+import { useField } from '../hooks/index';
 
 const Login = ({ user, setNotification }) => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const username = useField('text');
+    const password = useField('password');
 
     const handleLogin = async (event) => {
         event.preventDefault();
         try {
-            const data = { username, password };
+            const data = { username: username.value, password: password.value };
             let usr = await login(data);
             if (usr.name && usr.name !== 'Error') {
                 user(usr);
@@ -25,25 +26,21 @@ const Login = ({ user, setNotification }) => {
                 setNotification(null);
             }, 5000);
         }
-        setUsername('');
-        setPassword('');
-    
+        username.reset();
+        password.reset();
     }
+
+    const u = {...username, reset: null};
+    const p = {...password, reset: null};
 
     return (
         <>
             <h2>log in to application</h2>
             <form onSubmit={handleLogin}>
                 käyttäjätunnus
-                <input
-                    type="text"
-                    value={username}
-                    onChange={t => setUsername(t.target.value)} /><br />
+                <input {...u}/><br />
                 salasana
-                <input
-                    type="password"
-                    value={password}
-                    onChange={t => setPassword(t.target.value)} /><br />
+                <input {...p} /><br />
                 <button type="submit">Kirjaudu</button>
             </form>
         </>

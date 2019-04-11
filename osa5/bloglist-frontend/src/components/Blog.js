@@ -2,11 +2,6 @@ import React, { useState } from 'react';
 import blogService from '../services/blogs';
 import PropTypes from 'prop-types';
 
-Blog.propTypes = {
-    blog: PropTypes.func.isRequired,
-    user: PropTypes.func.isRequired
-}
-
 const Blog = ({ blog, user }) => {
     const [show, setShow] = useState(false);
     const blogStyle = {
@@ -51,6 +46,11 @@ const Blog = ({ blog, user }) => {
             {blog.title} {blog.author}
         </div>
     );
+}
+
+Blog.propTypes = {
+    blog: PropTypes.func.isRequired,
+    user: PropTypes.func.isRequired
 }
 
 export default Blog
