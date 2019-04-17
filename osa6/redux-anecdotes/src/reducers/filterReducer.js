@@ -7,4 +7,13 @@ const filterReducer = (state='', action) => {
     }
 }
 
+export const setFilter = (text) => {
+    return {
+        type: 'SET',
+        data: {
+            filter: text
+        }
+    }
+}
+
 export default filterReducer;

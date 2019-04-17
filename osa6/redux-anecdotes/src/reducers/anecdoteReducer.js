@@ -35,6 +35,15 @@ const sortState = (state) => {
     return newState;
 }
 
+export const vote = (id) => {
+    return {
+        type: 'VOTE',
+        data: {
+            id
+        }
+    }
+}
+
 const anecdoteReducer = (state = initialState, action) => {
     switch(action.type) {
         case 'NEW':

@@ -1,12 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { showNotification, hideNotification } from '../reducers/notificationReducer';
+import { vote } from '../reducers/anecdoteReducer';
 
-const AnecdoteList = ({ anecdotes, filter, showNotification, hideNotification }) => {
-    const fanecdotes = anecdotes.filter(a => a.content.toLowerCase().includes(filter.toLowerCase()));
+const CAnecdoteList = ({ visibleAnecdotes, vote, showNotification, hideNotification }) => {
+    const fanecdotes = visibleAnecdotes;
 
-    const vote = (id, content) => {
-        anecdotes.dispatch({ type: 'VOTE', data: { id } });
+    const voteA = (id, content) => {
+        vote(id);
         showNotification('you voted \'' + content + '\'');
         setTimeout(() => {
             hideNotification();
@@ -22,7 +23,7 @@ const AnecdoteList = ({ anecdotes, filter, showNotification, hideNotification })
                     </div>
                     <div>
                         has {anecdote.votes}
-                        <button onClick={() => vote(anecdote.id, anecdote.content)}>vote</button>
+                        <button onClick={() => voteA(anecdote.id, anecdote.content)}>vote</button>
                     </div>
                 </div>
             )}
@@ -30,10 +31,13 @@ const AnecdoteList = ({ anecdotes, filter, showNotification, hideNotification })
     );
 }
 
+const anecdotesToShow = ({anecdotes, filter}) => {
+    return anecdotes.filter(a => a.content.toLowerCase().includes(filter.toLowerCase()));
+}
+
 const mapStateToProps = (state) => {
     return {
-        anecdotes: state.anecdotes,
-        filter: state.filter,
+        visibleAnecdotes: anecdotesToShow(state),
         notification: state.notification
     }
 }
@@ -45,9 +49,12 @@ const mapDispatchToProps = dispatch => {
         },
         hideNotification: value => {
             dispatch(hideNotification(value))
+        },
+        vote: value => {
+            dispatch(vote(value))
         }
     }
 }
 
-const CAnecdoteList = connect(mapStateToProps, mapDispatchToProps)(AnecdoteList);
-export default CAnecdoteList;
+const AnecdoteList = connect(mapStateToProps, mapDispatchToProps)(CAnecdoteList);
+export default AnecdoteList;
