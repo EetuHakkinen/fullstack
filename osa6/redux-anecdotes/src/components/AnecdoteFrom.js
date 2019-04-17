@@ -1,20 +1,19 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { showNotification, hideNotification } from '../reducers/notificationReducer';
+import { setNotification } from '../reducers/notificationReducer';
+import { create } from '../reducers/anecdoteReducer';
 
-const CAnecdoteForm = ({ store }) => {
-    const create = (event) => {
+const CAnecdoteForm = ({ create, setNotification }) => {
+    const ccreate = (event) => {
         event.preventDefault();
-        store.dispatch(create(event.target.newAnecdoteForm.value));
-        store.dispatch(showNotification('you created \'' + event.target.newAnecdoteForm.value + '\''));
-        setTimeout(() => {
-            store.dispatch(hideNotification());
-        }, 5000)
+        create(event.target.newAnecdoteForm.value);
+        setNotification(`You created ${event.target.newAnecdoteForm.value}`, 5)
+        event.target.newAnecdoteForm.value = '';
     }
     return (
         <>
             <h2>create new</h2>
-            <form onSubmit={(e) => create(e)}>
+            <form onSubmit={(e) => ccreate(e)}>
                 <div><input name="newAnecdoteForm" /></div>
                 <button type="submit">create</button>
             </form>
@@ -25,9 +24,10 @@ const CAnecdoteForm = ({ store }) => {
 const mapStateToProps = (state) => {
     return {
         anecdotes: state.anecdotes,
-        filter: state.filter
+        filter: state.filter,
+        notification: state.notification
     }
 }
 
-const AnecdoteForm = connect(mapStateToProps)(CAnecdoteForm);
+const AnecdoteForm = connect(mapStateToProps, { create, setNotification })(CAnecdoteForm);
 export default AnecdoteForm;

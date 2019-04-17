@@ -1,11 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import App from './App'
 import anecdoteReducer from './reducers/anecdoteReducer'
 import notificationReducer from './reducers/notificationReducer';
 import filterReducer from './reducers/filterReducer';
+import thunk from 'redux-thunk';
 
 const reducer = combineReducers({
     anecdotes: anecdoteReducer,
@@ -13,7 +14,7 @@ const reducer = combineReducers({
     filter: filterReducer
 });
 
-const store = createStore(reducer);
+const store = createStore(reducer, applyMiddleware(thunk));
 
 const render = () => {
     ReactDOM.render(

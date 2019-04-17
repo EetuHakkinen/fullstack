@@ -1,17 +1,15 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { showNotification, hideNotification } from '../reducers/notificationReducer';
+import { showNotification, hideNotification, setNotification } from '../reducers/notificationReducer';
 import { vote } from '../reducers/anecdoteReducer';
 
-const CAnecdoteList = ({ visibleAnecdotes, vote, showNotification, hideNotification }) => {
+const CAnecdoteList = ({ visibleAnecdotes, vote, showNotification, hideNotification, setNotification }) => {
     const fanecdotes = visibleAnecdotes;
 
     const voteA = (id, content) => {
         vote(id);
-        showNotification('you voted \'' + content + '\'');
-        setTimeout(() => {
-            hideNotification();
-        }, 5000)
+        console.log(setNotification);
+        setNotification(`You voted ${content}`, 5)
     }
 
     return (
@@ -52,7 +50,10 @@ const mapDispatchToProps = dispatch => {
         },
         vote: value => {
             dispatch(vote(value))
-        }
+        },
+        setNotification: value => {
+            dispatch(setNotification(value));
+        },
     }
 }
 
