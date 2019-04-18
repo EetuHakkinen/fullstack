@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import blogService from '../services/blogs';
-import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 const Blog = ({ blog, user }) => {
     const [show, setShow] = useState(false);
@@ -23,10 +23,12 @@ const Blog = ({ blog, user }) => {
     }
 
     var ownBlog;
-    if (blog.user.name.toString() === user.name.toString()) {
-        ownBlog = true;
-    } else {
-        ownBlog = false;
+    if (user.name && blog.user.name) {
+        if (blog.user.name.toString() === user.name.toString()) {
+            ownBlog = true;
+        } else {
+            ownBlog = false;
+        }
     }
 
     if (show) {
@@ -48,9 +50,10 @@ const Blog = ({ blog, user }) => {
     );
 }
 
-Blog.propTypes = {
-    blog: PropTypes.func.isRequired,
-    user: PropTypes.func.isRequired
+const mapStateToProps = (state) => {
+    return {
+        user: state.user,
+    }
 }
 
-export default Blog
+export default connect(mapStateToProps)(Blog)

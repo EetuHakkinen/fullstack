@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import login from '../services/login';
 import { useField } from '../hooks/index';
+import { connect } from 'react-redux';
+import { showNotification } from '../reducers/notificationReducer';
+import { setUser } from '../reducers/userReducer';
 
-const Login = ({ user, setNotification }) => {
+const Login = (props) => {
     const username = useField('text');
     const password = useField('password');
 
@@ -12,18 +15,18 @@ const Login = ({ user, setNotification }) => {
             const data = { username: username.value, password: password.value };
             let usr = await login(data);
             if (usr.name && usr.name !== 'Error') {
-                user(usr);
+                props.setUser(usr);
                 window.localStorage.setItem('user', JSON.stringify(usr));
             } else {
-                setNotification('Wrong username or password!');
+                showNotification('Wrong username or password!');
                 setTimeout(() => {
-                    setNotification(null);
+                    showNotification(null);
                 }, 5000);
             }
         } catch (e) {
-            setNotification(e);
+            showNotification(e);
             setTimeout(() => {
-                setNotification(null);
+                showNotification(null);
             }, 5000);
         }
         username.reset();
@@ -47,4 +50,4 @@ const Login = ({ user, setNotification }) => {
     );
 };
 
-export default Login;
+export default connect(null, { showNotification, setUser })(Login);

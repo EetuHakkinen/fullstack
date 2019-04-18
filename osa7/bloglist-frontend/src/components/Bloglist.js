@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import { showNotification } from '../reducers/notificationReducer';
+import CreateBlog from './CreateBlog';
+import Blog from './Blog';
+import { setUser } from '../reducers/userReducer';
 
 const Bloglist = (props) => {
     const [showCreate, setShowCreate] = useState(false);
@@ -8,10 +12,10 @@ const Bloglist = (props) => {
         <div>
             <h2>blogs</h2>
             <p>{props.user.name} logged in</p>
-            <button onClick={() => props.setUser()}>logout</button>
-            {showCreate ? <CreateBlog token={props.user.token} setNotification={v => props.setNotification(v)} setShowCreate={v => setShowCreate(v)} /> : <button onClick={() => setShowCreate(true)}>create new</button>}
+            <button onClick={() => props.setUser(null)}>logout</button>
+            {showCreate ? <CreateBlog token={props.user.token} setNotification={v => props.showNotification(v)} setShowCreate={v => setShowCreate(v)} /> : <button onClick={() => setShowCreate(true)}>create new</button>}
             {props.blogs.map(blog =>
-                <Blog key={blog.id} blog={blog} user={props.user} />
+                <Blog key={blog.id} blog={blog} />
             )}
         </div>
     );
@@ -19,8 +23,9 @@ const Bloglist = (props) => {
 
 const mapStateToProps = (state) => {
     return {
-        blogs: state.blogReducer
+        blogs: state.blogs,
+        user: state.user
     }
 }
 
-export default connect(mapStateToProps)(Bloglist)
+export default connect(mapStateToProps, {showNotification, setUser})(Bloglist);

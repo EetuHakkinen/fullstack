@@ -1,9 +1,0 @@
-{
-    "api": {
-        "blogs": {
-            "title": "Reactin perusteet",
-            "author": "Eetu Häkkinen",
-            "url": "https://fullstackopen.com/osa7/tehtavia_blogilistan_laajennus"
-        }
-    }
-}
