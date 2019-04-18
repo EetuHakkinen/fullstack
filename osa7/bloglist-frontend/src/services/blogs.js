@@ -29,4 +29,9 @@ const remove = (id) => {
     axios.delete(baseUrl + '/' + id);
 }
 
-export default { getAll, postNew, like, remove }
+const comment = async (id, content) => {
+    var prevComments = await axios.get(baseUrl + '/' + id + '/comments');
+    axios.put(baseUrl + '/' + id + '/comments', prevComments.concat(content));
+}
+
+export default { getAll, postNew, like, remove, comment}

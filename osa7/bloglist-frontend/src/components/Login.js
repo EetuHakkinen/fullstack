@@ -4,6 +4,7 @@ import { useField } from '../hooks/index';
 import { connect } from 'react-redux';
 import { showNotification } from '../reducers/notificationReducer';
 import { setUser } from '../reducers/userReducer';
+import {Form, Button} from 'react-bootstrap';
 
 const Login = (props) => {
     const username = useField('text');
@@ -39,13 +40,13 @@ const Login = (props) => {
     return (
         <>
             <h2>log in to application</h2>
-            <form onSubmit={handleLogin}>
+            <Form onSubmit={handleLogin}>
                 käyttäjätunnus
-                <input {...u}/><br />
+                <Form.Control {...u}/><br />
                 salasana
-                <input {...p} /><br />
-                <button type="submit">Kirjaudu</button>
-            </form>
+                <Form.Control {...p} /><br />
+                <Button variant="primary" type="submit">Kirjaudu</Button>
+            </Form>
         </>
     );
 };

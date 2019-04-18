@@ -1,11 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Alert } from 'react-bootstrap';
 
 const Notification = (props) => {
-    if (!props.message) {
-        return null;
-    }
-    return props.message
+    return (
+        <div>
+            {props.message && <Alert variant="info">{props.message}</Alert>}
+        </div>
+    )
+    
 }
 
 const mapStateToProps = (state) => {

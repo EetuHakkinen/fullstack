@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import blogService from '../services/blogs';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 const Blog = ({ blog, user }) => {
     const [show, setShow] = useState(false);
@@ -23,7 +24,9 @@ const Blog = ({ blog, user }) => {
     }
 
     var ownBlog;
-    if (user.name && blog.user.name) {
+    console.log(user);
+    console.log(blog.user);
+    if (user && user.name && blog.user.name) {
         if (blog.user.name.toString() === user.name.toString()) {
             ownBlog = true;
         } else {
@@ -34,7 +37,7 @@ const Blog = ({ blog, user }) => {
     if (show) {
         return (
             <div style={blogStyle} onClick={() => setShow(false)}>
-                <p>{blog.title} {blog.author}</p>
+                <Link to={'/blogs/' + blog.id}>{blog.title} {blog.author}</Link><br />
                 <a href={blog.url}>{blog.url}</a>
                 {blog.likes} likes <button onClick={like}>like</button><br />
                 <p>added by {blog.user.name}</p>
@@ -45,7 +48,7 @@ const Blog = ({ blog, user }) => {
 
     return (
         <div style={blogStyle} onClick={() => setShow(true)}>
-            {blog.title} {blog.author}
+            <Link to={'/blogs/' + blog.id}>{blog.title} {blog.author}</Link>
         </div>
     );
 }

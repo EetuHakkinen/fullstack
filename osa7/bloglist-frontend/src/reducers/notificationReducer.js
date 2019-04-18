@@ -9,11 +9,9 @@ const notificationReducer = (state='', action) => {
 
 export default notificationReducer;
 
-export const showNotification = (mes) => {
+export const showNotification = (data) => {
     return {
         type: 'SHOW',
-        data: {
-            message: mes,
-        }
+        data
     }
 }

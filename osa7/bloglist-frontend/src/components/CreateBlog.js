@@ -3,6 +3,7 @@ import blogService from '../services/blogs';
 import { connect } from 'react-redux';
 import { showNotification } from '../reducers/notificationReducer';
 import { createBlog } from '../reducers/blogReducer';
+import {Form, Button} from 'react-bootstrap';
 
 const CreateBlog = (props) => {
     const [title, setTitle] = useState('');
@@ -12,7 +13,7 @@ const CreateBlog = (props) => {
     const handleCreate = (event) => {
         event.preventDefault();
         try {
-            props.createBlog({ title, author, url, token: props.user.token });
+            props.createBlog({ title, author, url, user: props.user });
             props.setNotification(`Blogi ${title} lisätty!`);
             props.setShowCreate(false);
             setTimeout(() => {
@@ -30,24 +31,27 @@ const CreateBlog = (props) => {
     }
 
     return (
-        <form onSubmit={handleCreate}>
+        <Form onSubmit={handleCreate}>
             title:
-            <input
+            <Form.Control
+                id="title"
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)} /><br />
             author:
-            <input
+            <Form.Control
+                id="author"
                 type="text"
                 value={author}
                 onChange={e => setAuthor(e.target.value)} /><br />
             url:
-            <input
+            <Form.Control
+                id="url"
                 type="text"
                 value={url}
                 onChange={e => setUrl(e.target.value)} /><br />
-            <button type="submit">create</button>
-        </form>
+            <Button variant="primary" type="submit">create</Button>
+        </Form>
     );
 }
 

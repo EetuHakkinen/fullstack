@@ -4,16 +4,18 @@ import { showNotification } from '../reducers/notificationReducer';
 import CreateBlog from './CreateBlog';
 import Blog from './Blog';
 import { setUser } from '../reducers/userReducer';
+import { Button } from 'react-bootstrap';
+import Login from './Login';
 
 const Bloglist = (props) => {
     const [showCreate, setShowCreate] = useState(false);
-
+    console.log(props.user);
+    if (!props.user || !props.user.name) {
+        return <Login />
+    }
     return (
         <div>
-            <h2>blogs</h2>
-            <p>{props.user.name} logged in</p>
-            <button onClick={() => props.setUser(null)}>logout</button>
-            {showCreate ? <CreateBlog token={props.user.token} setNotification={v => props.showNotification(v)} setShowCreate={v => setShowCreate(v)} /> : <button onClick={() => setShowCreate(true)}>create new</button>}
+            {showCreate ? <CreateBlog token={props.user.token} setNotification={v => props.showNotification(v)} setShowCreate={v => setShowCreate(v)} /> : <Button variant="primary" onClick={() => setShowCreate(true)}>create new</Button>}
             {props.blogs.map(blog =>
                 <Blog key={blog.id} blog={blog} />
             )}
