@@ -1,6 +1,27 @@
-const { ApolloServer, gql } = require('apollo-server');
+const { ApolloServer, gql, UserInputError, AuthenticationError, PubSub } = require('apollo-server');
 const uuid = require('uuid');
+const mongoose = require('mongoose');
+const Book = require('./models/Book');
+const Author = require('./models/Author');
+const User = require('./models/User');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const pubsub = new PubSub();
 
+mongoose.set('useFindAndModify', false);
+
+const MONGODB_URI = process.env.MONGODB_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+mongoose.connect(MONGODB_URI, {useNewUrlParser: true})
+    .then(() => {
+        console.log('connected to MongoDB');
+    })
+    .catch((e) => {
+        console.error('error connection to MongoDB:', e.message);
+    })
+
+/*
 let authors = [
     {
         name: 'Robert Martin',
@@ -25,13 +46,13 @@ let authors = [
         name: 'Sandi Metz', // birthyear not known
         id: "afa5b6f3-344d-11e9-a414-719c6709cf3e",
     },
-]
+]*/
 
 /*
  * Saattaisi olla järkevämpää assosioida kirja ja sen tekijä tallettamalla kirjan yhteyteen tekijän nimen sijaan tekijän id
  * Yksinkertaisuuden vuoksi tallennamme kuitenkin kirjan yhteyteen tekijän nimen
 */
-
+/*
 let books = [
     {
         title: 'Clean Code',
@@ -82,15 +103,15 @@ let books = [
         id: "afa5de04-344d-11e9-a414-719c6709cf3e",
         genres: ['classic', 'revolution']
     },
-]
+]*/
 
 const typeDefs = gql`
     type Book {
         title: String!
-        published: Int
-        author: String!
+        published: Int!
+        author: Author!
         id: ID!
-        genres: [String]
+        genres: [String!]!
     }
 
     type Author {
@@ -98,6 +119,16 @@ const typeDefs = gql`
         id: ID!
         born: Int
         bookCount: Int
+    }
+
+    type User {
+        username: String!
+        favoriteGenre: String!
+        id: ID!
+    }
+
+    type Token {
+        value: String!
     }
 
     type Mutation {
@@ -108,6 +139,14 @@ const typeDefs = gql`
             genres: [String]
         ): Book
         editAuthor(name: String! setBornTo: Int!): Author
+        createUser(
+            username: String!
+            favoriteGenre: String!
+        ): User
+        login(
+            username: String!
+            password: String!
+        ): Token
     }
 
     type Query {
@@ -115,38 +154,93 @@ const typeDefs = gql`
         authorCount: Int
         allBooks(author: String genre: String): [Book]
         allAuthors: [Author]
+        me: User
+        favoriteBooks: [Book!]!
+    }
+
+    type Subscription {
+        bookAdded: Book!
     }
 `
 
 const resolvers = {
     Mutation: {
-        addBook: (root, args) => {
-            if (!authors.find(a => a.name === args.name)) {
-                authors = authors.concat({ name: args.name, id: uuid() })
-            }
-
-            const book = {...args, id: uuid()};
-            books = books.concat(book);
-            return book;
-        },
-        editAuthor: (root, args) => {
-            for (var a in authors) {
-                if (authors[a].name === args.name) {
-                    authors[a].born = args.setBornTo;
-                    return {name: authors[a].name, born: authors[a].born};
+        addBook: async (root, args, context) => {
+            try {
+                if (!context.currentUser) {
+                    throw new AuthenticationError("nto authenticated")
                 }
+                if (!Author.find({name: args.name})) {
+                    newAuthor = new Author({ name: args.name, id: uuid() });
+                    newAuthor.save();
+                }
+
+                const author = Author.find({name: args.name});
+                const book = new Book({...args, author});
+                await book.save();
+                pubsub.publish('BOOK_ADDED', {bookAdded: book})
+                return book;
+            } catch (error) {
+                throw new UserInputError(error.message, {invalidArgs: args});
             }
+            
+        },
+        editAuthor: (root, args, context) => {
+            if (!context.currentUser) {
+                throw new AuthenticationError("nto authenticated")
+            }
+            try {
+                for (var a in authors) {
+                    if (authors[a].name === args.name) {
+                        authors[a].born = args.setBornTo;
+                        return Author.findByIdAndUpdate(Author.find({name: authors[ə].name}), {name: authors[a].name, born: authors[a].born}) ;
+                    }
+                }
+            } catch (error) {
+                throw new UserInputError(error.message, {invalidArgs: args});
+            }
+            
             return null;
+        },
+        createUser: (root, args) => {
+            const user = new User({username: args.username});
+            return user.save()
+                .catch(e => {
+                    throw new UserInputError(e.message, {invalidArgs: args});
+                })
+        },
+        login: async (root, args) => {
+            const user = await User.findOne({username: args.username});
+            if (!user || args.password !== 'secred') {
+                throw new UserInputError("wrong credentials");
+            }
+            const userForToken = {
+                username: user.username,
+                id: user._id
+            }
+            return {value: jwt.sign(userForToken, JWT_SECRET)};
         }
     },
     Query: {
-        bookCount: () => books.length,
-        authorCount: () => authors.length,
-        allBooks: (root, args) => books.filter(b => b.author === args.author || b.genres.includes(args.genre)),
-        allAuthors: () => authors
+        bookCount: () => Book.collection.countDocuments(),
+        authorCount: () => Author.collection.countDocuments(),
+        allBooks: (root, args) => Book.find({genre: {$in: [args.genre]}}),
+        allAuthors: () => Author.find({}),
+        me: (root, args, context) => context.currentUser,
+        favoriteBooks: (root, args, context) => {
+            const favoriteGenres = context.currentUser.favoriteGenres;
+            const books = Book.find({});
+            const favoriteBooks = books.filter(b => favoriteGenres.map(g => b.genres.includes(g)));
+            return favoriteBooks;
+        }
     },
     Author: {
-        bookCount: (root, args) => books.filter(b => b.author === root.name).length
+        bookCount: (root, args) => Book.collection.countDocuments()/*.filter(b => b.author === root.name).length*/
+    },
+    Subscription: {
+        bookAdded: {
+            subscribe: () => pubsub.asyncIterator('BOOK_ADDED')
+        }
     }
 }
 
@@ -155,6 +249,7 @@ const server = new ApolloServer({
     resolvers,
 })
 
-server.listen().then(({ url }) => {
-    console.log(`Server ready at ${url}`)
+server.listen().then(({ url, subscriptionsUrl }) => {
+    console.log(`Server ready at ${url}`);
+    console.log(`Subscriptions ready at ${subscriptionsUrl}`);
 })
